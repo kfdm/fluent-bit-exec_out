@@ -2,6 +2,7 @@ package main
 
 import (
 	"C"
+	"encoding/json"
 	"log"
 	"os"
 	"os/exec"
@@ -9,10 +10,7 @@ import (
 	"unsafe"
 
 	"github.com/fluent/fluent-bit-go/output"
-	jsoniter "github.com/json-iterator/go"
 )
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 //export FLBPluginRegister
 func FLBPluginRegister(def unsafe.Pointer) int {
@@ -45,6 +43,7 @@ func FLBPluginFlushCtx(ctx, data unsafe.Pointer, length C.int, tag *C.char) int 
 
 	// Process Data
 	dec := output.NewDecoder(data, int(length))
+
 	for {
 		// Pull in our record
 		ret, _, record := output.GetRecord(dec)
@@ -53,8 +52,8 @@ func FLBPluginFlushCtx(ctx, data unsafe.Pointer, length C.int, tag *C.char) int 
 		}
 
 		// Convert to json
-		line, err := json.Marshal(&record)
-		// line, err := json.Marshal(record)
+		parsedRecord := ParseRecord(record)
+		line, err := json.Marshal(parsedRecord)
 		if err != nil {
 			log.Printf("[exec_out] %s", err)
 			continue
