@@ -41,13 +41,21 @@ func FLBPluginFlushCtx(ctx, data unsafe.Pointer, length C.int, tag *C.char) int 
 		return output.FLB_ERROR
 	}
 
+	// Start our sub process
+	if err := cmd.Start(); err != nil {
+		log.Printf("[exec_out] %s", err)
+		return output.FLB_ERROR
+	}
+
 	// Process Data
 	dec := output.NewDecoder(data, int(length))
 
 	for {
-		// Pull in our record
+		// As long as we still have records continue
+		// Close stdin and exit when we're done
 		ret, _, record := output.GetRecord(dec)
 		if ret != 0 {
+			stdin.Close()
 			break
 		}
 
@@ -64,11 +72,8 @@ func FLBPluginFlushCtx(ctx, data unsafe.Pointer, length C.int, tag *C.char) int 
 		stdin.Write([]byte("\n"))
 	}
 
-	stdin.Close()
-
-	err = cmd.Run()
-
-	if err != nil {
+	// Wait for the program to end so we can return ourselves
+	if err := cmd.Wait(); err != nil {
 		log.Printf("[exec_out] %s", err)
 		return output.FLB_ERROR
 	}
