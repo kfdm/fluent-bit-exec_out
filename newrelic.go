@@ -1,9 +1,5 @@
 package main
 
-import (
-	"C"
-)
-
 // Taken from https://github.com/newrelic/newrelic-fluent-bit-output/blob/304303f8912a3d6680e497a3a0a68006d62ba0fc/record/record.go
 // parseRecord transforms a log record emitted by FluentBit into a LogRecord
 // domain type: a map of string keys and arbitrary (int, string, etc.) values.
