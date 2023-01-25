@@ -8,3 +8,11 @@ test: out_exec.so
 .PHONY: list
 list: out_exec.so
 	fluent-bit -e out_exec.so --help
+
+.PHONY: build
+build:
+	docker build . -t fluent-bit-out
+
+.PHONY: demo
+demo:
+	docker run -it --rm fluent-bit-out
